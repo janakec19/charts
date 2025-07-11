@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Conversion Funnel</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #f8f9fa;
+    }
+    h2 {
+      text-align: center;
+    }
+    .chart-container {
+      width: 85%;
+      max-width: 900px;
+      margin: auto;
+    }
+    #stepInfo {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Interactive Conversion Funnel</h2>
+  <div class="chart-container">
+    <canvas id="funnelChart"></canvas>
+    <div id="stepInfo">Click on a step to see details.</div>
+  </div>
+
+  <script>
+    const steps = ['Visited Site', 'Signed Up', 'Activated Account', 'Added to Cart', 'Purchased'];
+    const users = [10000, 7000, 5000, 2500, 1000];
+    const entry = users[0];
+    const conversionRates = users.map(v => (v / entry * 100).toFixed(1) + '%');
+
+    const ctx = document.getElementById('funnelChart').getContext('2d');
+    const stepInfo = document.getElementById('stepInfo');
+
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: steps,
+        datasets: [{
+          label: 'Users',
+          data: users,
+          backgroundColor: '#007bff',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        onClick: (e, elements) => {
+          if (elements.length > 0) {
+            const i = elements[0].index;
+            const prev = i === 0 ? users[i] : users[i - 1];
+            const drop = i === 0 ? '—' : ((prev - users[i]) / prev * 100).toFixed(1) + '%';
+            stepInfo.innerHTML = `
+              <strong>${steps[i]}</strong><br/>
+              Users: ${users[i].toLocaleString()}<br/>
+              Conversion from start: ${conversionRates[i]}<br/>
+              Drop-off from previous: ${drop}
+            `;
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Conversion Funnel Analysis'
+          },
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              afterLabel: function(context) {
+                const i = context.dataIndex;
+                if (i === 0) return '';
+                const drop = ((users[i - 1] - users[i]) / users[i - 1] * 100).toFixed(1);
+                return `Drop-off from previous: ${drop}%`;
+              }
+            }
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'right',
+            formatter: (val, ctx) => {
+              const i = ctx.dataIndex;
+              return `${val} users\n(${conversionRates[i]})`;
+            },
+            font: { weight: 'bold' }
+          }
+        },
+        scales: {
+          x: { beginAtZero: true },
+          y: { ticks: { font: { size: 14 } } }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+  </script>
+
+</body>
+</html>
