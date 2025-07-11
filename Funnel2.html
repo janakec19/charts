@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UXCam Style Funnel Dropout Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f8f9fc;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .chart-container {
+      width: 70%;
+      margin: auto;
+    }
+    .dropout-label {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Funnel Dropout Analysis</h2>
+  <div class="chart-container">
+    <canvas id="funnelChart"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('funnelChart').getContext('2d');
+
+    const stages = ['App Launch', 'Onboarding Completed', 'Account Created', 'First Action', 'Conversion'];
+    const values = [1000, 800, 500, 300, 150];
+
+    const dropoutRates = values.map((val, i) => {
+      if (i === 0) return '';
+      const drop = ((values[i - 1] - val) / values[i - 1]) * 100;
+      return `Drop: ${drop.toFixed(1)}%`;
+    });
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: stages,
+        datasets: [{
+          label: 'Users',
+          data: values,
+          backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+          borderRadius: 10
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        plugins: {
+          tooltip: {
+            callbacks: {
+              afterLabel: function(context) {
+                return dropoutRates[context.dataIndex];
+              }
+            }
+          },
+          legend: {
+            display: false
+          },
+          title: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          },
+          y: {
+            ticks: {
+              font: {
+                size: 14
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
